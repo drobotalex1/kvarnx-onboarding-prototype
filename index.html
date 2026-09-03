@@ -34,7 +34,8 @@
   }
 
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
+  body{margin:0;background:#fff;color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
+  #deviceScreen{min-height:100vh;}
   .wrap{max-width:1320px;margin:0 auto;padding:40px 24px 72px;}
 
   .head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:32px;}
@@ -121,7 +122,7 @@
   .hero-photo img{max-width:100%;height:auto;display:block;}
 
   .page-body{padding:52px 40px 44px;}
-  .split{display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:start;}
+  .split{display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:start;max-width:1180px;margin:0 auto;}
   @media (max-width:640px){.split{grid-template-columns:1fr;}}
   .kicker{font-family:'IBM Plex Mono';font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8B9891;margin:0 0 10px;}
   h3.scr-title{font-family:'Manrope';font-weight:800;font-size:30px;line-height:1.15;margin:0 0 10px;letter-spacing:-.01em;color:#0A0A0A;max-width:14ch;text-wrap:balance;}
@@ -169,6 +170,7 @@
   .env-icon svg{width:28px;height:28px;color:var(--good);}
   .timer{font-family:'IBM Plex Mono';font-weight:600;color:#8B9891;}
   .badge-good{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--good);background:#F2FFF8;padding:6px 12px;border-radius:999px;margin-bottom:16px;}
+  .badge-good svg{width:12px;height:12px;flex-shrink:0;}
 
   .tabgroup{display:flex;background:#F2F4F1;border-radius:12px;padding:4px;margin-bottom:22px;max-width:340px;}
   .tabgroup button{flex:1;padding:9px;border:none;background:transparent;border-radius:9px;font-family:'Inter';font-weight:700;font-size:12.5px;color:#8B9891;cursor:pointer;}
@@ -185,7 +187,7 @@
   .adv pre{font-family:'IBM Plex Mono';font-size:11px;background:#F5F7F4;padding:10px 12px;border-radius:8px;margin:10px 0 0;color:#5B6660;}
 
   /* ---- app shell (post-login, dark) ---- */
-  .app-shell{display:flex;min-height:600px;background:#08120F;color:#EFFFF6;}
+  .app-shell{display:flex;min-height:100vh;background:#08120F;color:#EFFFF6;}
   .app-side{width:210px;flex-shrink:0;border-right:1px solid #16241E;padding:22px 16px;display:flex;flex-direction:column;gap:4px;}
   .app-side .logo-row{display:flex;align-items:center;gap:8px;padding:0 8px 24px;}
   .app-side .logo-row .mark{width:22px;height:22px;border-radius:50%;background:var(--mint-ink);display:flex;align-items:center;justify-content:center;}
@@ -217,38 +219,8 @@
   footer.credits{max-width:1320px;margin:56px auto 0;padding:0 24px;font-size:12px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:20px;}
 </style>
 
-<div class="wrap">
-  <div class="head">
-    <div>
-      <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 5L19 19M19 5L5 19" stroke="#90FFBC" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="word">KVARN X</span></div>
-      <h1>Onboarding &amp; auth, redesigned</h1>
-      <p class="lede">A clickable web prototype rebuilding sign-up, verification and 2&#8209;FA from the flow audit &mdash; Kvarn's own colors and marks, patterns borrowed from Kraken, Binance, Revolut and eToro, every fix mapped back to a specific finding.</p>
-    </div>
-    <div class="head-meta">
-      <span class="tag">Interactive prototype &middot; web</span>
-      <div class="fixcount">27<span>audit findings addressed across 8 screens</span></div>
-    </div>
-  </div>
+<div id="deviceScreen"></div>
 
-  <nav class="rail" id="rail" aria-label="Prototype progress"></nav>
-  <div class="rail-hint">↳ this bar just tracks where you are — click the real buttons inside the browser window below to move through the flow, like a real site.</div>
-
-  <div class="stage">
-    <div class="browser-col">
-      <div class="browser">
-        <div class="chrome">
-          <div class="dots"><i></i><i></i><i></i></div>
-          <button id="backArrow" title="Back" aria-label="Back" style="background:none;border:none;color:#6E8981;cursor:pointer;padding:0;display:flex;align-items:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="urlbar"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 8V7a3 3 0 116 0v3H9z" fill="currentColor"/></svg><span id="urlText">kvarnx.com</span></div>
-        </div>
-        <div class="browser-screen" id="deviceScreen"></div>
-      </div>
-    </div>
-    <aside class="notes" id="notes"></aside>
-  </div>
-</div>
-
-<footer class="credits">Prototype built from the &ldquo;KvarnX registration flow fixes&rdquo; review. Colors sampled live from kvarnx.com (mint <span style="font-family:'IBM Plex Mono'">#90FFBC</span> on deep teal <span style="font-family:'IBM Plex Mono'">#002F36</span>); patterns referenced from Kraken, Binance, Revolut and eToro onboarding flows. Web layout &mdash; not a production build.</footer>
 
 <script>
 const CHECK = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -566,53 +538,40 @@ const STEPS = [
   },
 ];
 
-const rail = document.getElementById('rail');
 const deviceScreen = document.getElementById('deviceScreen');
-const notes = document.getElementById('notes');
-const urlText = document.getElementById('urlText');
-const backArrow = document.getElementById('backArrow');
 const byId = Object.fromEntries(STEPS.map((s,i)=>[s.id,i]));
-let current = 0;
-let historyStack = [];
+const ROUTES = {'':'landing'};
+STEPS.forEach(s=>{ ROUTES[s.id] = s.id; });
 
-STEPS.forEach((s,i)=>{
-  const b = document.createElement('div');
-  b.className='step-btn';
-  b.innerHTML = `<span class="num">${i+1}</span>${s.label}`;
-  rail.appendChild(b);
-});
-
-function renderRail(){
-  [...rail.children].forEach((b,i)=>{
-    b.setAttribute('aria-current', i===current ? 'true':'false');
-    b.classList.toggle('visited', i<current);
-  });
-}
-function renderNotes(s){
-  notes.innerHTML = `
-    <div class="eyebrow">Screen ${current+1} of ${STEPS.length} &middot; ${s.label}</div>
-    <h2>${s.notesTitle}</h2>
-    <p class="sub">${s.notesSub}</p>
-    <ul class="fixlist">${s.fixes.map(f=>`<li><span class="chip">${CHECK}</span><span><b>${f[0]}.</b> ${f[1]}</span></li>`).join('')}</ul>
-    <div class="refs">${s.refs.map(r=>`<span>${r}</span>`).join('')}</div>`;
-}
 function renderDevice(s){
+  document.title = s.title || 'Kvarn X';
   deviceScreen.style.background = s.bg;
   deviceScreen.innerHTML = s.body;
-  urlText.textContent = s.url;
-  deviceScreen.scrollTop = 0;
-}
-function go(target, opts){
-  opts = opts || {};
-  const i = typeof target === 'number' ? target : byId[target];
-  if(i === undefined) return;
-  if(!opts.fromHistory) historyStack.push(current);
-  current = Math.max(0, Math.min(STEPS.length-1, i));
-  renderRail(); renderNotes(STEPS[current]); renderDevice(STEPS[current]);
-  backArrow.style.visibility = historyStack.length ? 'visible' : 'hidden';
+  window.scrollTo(0,0);
 }
 
-// event delegation: any element with data-goto inside the mock browser navigates, like a real link/button
+// real URLs: #/signup, #/verify-email, etc. Browser Back/Forward works natively.
+function go(target){
+  const id = typeof target === 'number' ? STEPS[target].id : target;
+  if(byId[id] === undefined) return;
+  const path = id === 'landing' ? '' : id;
+  if(location.hash.replace(/^#\/?/, '') !== path) location.hash = '/' + path;
+  else render(id);
+}
+
+function render(id){
+  const s = STEPS[byId[id]];
+  if(!s) return;
+  renderDevice(s);
+}
+
+function routeFromHash(){
+  const path = location.hash.replace(/^#\/?/, '');
+  const id = ROUTES[path] !== undefined ? path || 'landing' : 'landing';
+  render(id);
+}
+
+// event delegation: any element with data-goto inside the page navigates, like a real link
 deviceScreen.addEventListener('click', (e)=>{
   const el = e.target.closest('[data-goto]');
   if(!el) return;
@@ -620,13 +579,8 @@ deviceScreen.addEventListener('click', (e)=>{
   go(el.getAttribute('data-goto'));
 });
 
-backArrow.addEventListener('click', ()=>{
-  if(!historyStack.length) return;
-  const prev = historyStack.pop();
-  go(prev, {fromHistory:true});
-});
-
-go(0);
+window.addEventListener('hashchange', routeFromHash);
+routeFromHash();
 
 setInterval(()=>{
   const t = deviceScreen.querySelector('.timer');
