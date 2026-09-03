@@ -234,8 +234,11 @@
   .dash-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;}
   .dash-row b{font-weight:700;}
   .kyc-banner{grid-column:1/-1;background:linear-gradient(135deg,#123227,#0F211C);border:1px solid #1E332B;border-radius:16px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:2px;}
-  .kyc-banner .t{font-family:'Manrope';font-weight:800;font-size:14.5px;margin-bottom:4px;}
+  .kyc-banner .t{font-family:'Manrope';font-weight:800;font-size:14.5px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+  .kyc-banner .t svg{width:14px;height:14px;color:#3FDB8E;flex-shrink:0;}
   .kyc-banner .s{font-size:12.5px;color:#9FB3AC;}
+  .kyc-banner.state-unverified{background:linear-gradient(135deg,#26241A,#0F211C);border-color:#3A331E;}
+  .kyc-banner[hidden]{display:none;}
 
   .screen{display:none;}
   .screen.active{display:block;}
@@ -567,9 +570,13 @@ const STEPS = [
           <div class="dash-grid">
             <div class="dash-card"><div class="label">Contact</div><div class="dash-row"><span>Email</span><b class="email-text">anna.becker@gmail.com</b></div></div>
             <div class="dash-card"><div class="label">Security</div><div class="dash-row"><span>2FA</span><b style="color:#3FDB8E">Enabled</b></div></div>
-            <div class="kyc-banner">
-              <div><div class="t">Identity verified</div><div class="s">Full trading limits unlocked. Manage security anytime in Settings.</div></div>
+            <div class="kyc-banner state-verified">
+              <div><div class="t">${CHECK} Identity verified</div><div class="s">Full trading limits unlocked. Manage security anytime in Settings.</div></div>
               <button class="btn primary" style="flex-shrink:0" data-goto="twofa">Open Settings</button>
+            </div>
+            <div class="kyc-banner state-unverified">
+              <div><div class="t">Identity not verified yet</div><div class="s">Browsing is unlimited, but deposits and trading are locked until you verify. Takes about 2 minutes.</div></div>
+              <button class="btn primary" style="flex-shrink:0" data-goto="kyc">Verify identity</button>
             </div>
           </div>
         </div>
@@ -583,10 +590,20 @@ const ROUTES = {'':'landing'};
 STEPS.forEach(s=>{ ROUTES[s.id] = s.id; });
 
 let currentEmail = 'anna.becker@gmail.com';
+let currentId = 'landing';
+let identityVerified = false;
 
 function applyEmail(){
   deviceScreen.querySelectorAll('.email-input').forEach(el=>{ el.value = currentEmail; });
   deviceScreen.querySelectorAll('.email-text').forEach(el=>{ el.textContent = currentEmail; });
+}
+
+function applyVerifiedState(){
+  const verifiedEl = deviceScreen.querySelector('.state-verified');
+  const unverifiedEl = deviceScreen.querySelector('.state-unverified');
+  if(!verifiedEl || !unverifiedEl) return;
+  verifiedEl.hidden = !identityVerified;
+  unverifiedEl.hidden = identityVerified;
 }
 
 function renderDevice(s){
@@ -594,6 +611,7 @@ function renderDevice(s){
   deviceScreen.style.background = s.bg;
   deviceScreen.innerHTML = s.body;
   applyEmail();
+  applyVerifiedState();
   window.scrollTo(0,0);
 }
 
@@ -615,6 +633,7 @@ function go(target){
 function render(id){
   const s = STEPS[byId[id]];
   if(!s) return;
+  currentId = id;
   renderDevice(s);
 }
 
@@ -629,7 +648,11 @@ deviceScreen.addEventListener('click', (e)=>{
   const el = e.target.closest('[data-goto]');
   if(!el) return;
   e.preventDefault();
-  go(el.getAttribute('data-goto'));
+  const target = el.getAttribute('data-goto');
+  if(currentId === 'kyc' && target === 'twofa'){
+    identityVerified = true; // "Start verification" simulates a completed Sumsub check
+  }
+  go(target);
 });
 
 window.addEventListener('hashchange', routeFromHash);
