@@ -291,7 +291,7 @@ const STEPS = [
             <h1>One place for all your investments</h1>
             <p class="sub">Everything you need to start investing is here. From Stocks &amp; ETFs to crypto &mdash; buy, sell, and manage it all in one place.</p>
             <div class="hero-capture">
-              <input type="text" placeholder="Email address" value="anna.becker@gmail.com">
+              <input type="text" class="email-input" placeholder="Email address" value="anna.becker@gmail.com">
               <button data-goto="signup">Get started</button>
             </div>
             <p class="hero-legal">By continuing you agree to Kvarn X&#8217;s <a style="color:var(--mint-ink);font-weight:600">Terms</a> and <a style="color:var(--mint-ink);font-weight:600">Privacy Policy</a>.</p>
@@ -338,7 +338,7 @@ const STEPS = [
               <button data-goto="dash"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4" stroke="#0A0A0A" stroke-width="1.6"/><path d="M8 9a1 1 0 100-2 1 1 0 000 2zM8 17a1 1 0 100-2 1 1 0 000 2z" fill="#0A0A0A"/></svg>Passkey</button>
             </div>
             <div class="divider">or</div>
-            <div class="field"><label>Email address</label><input type="text" value="anna.becker@gmail.com"></div>
+            <div class="field"><label>Email address</label><input type="text" class="email-input" value="anna.becker@gmail.com"></div>
             <div class="field"><label>Password</label><input type="password" value="Anna2026!"></div>
             <div style="text-align:right;margin:-8px 0 18px"><a style="font-size:12.5px;color:var(--mint-ink);font-weight:600">Forgot password?</a></div>
             <button class="btn primary block" data-goto="dash">Log in</button>
@@ -380,7 +380,7 @@ const STEPS = [
               <button class="active">Personal account</button>
               <button>Business account</button>
             </div>
-            <div class="field"><label>Email address</label><input type="text" value="anna.becker@gmail.com"></div>
+            <div class="field"><label>Email address</label><input type="text" class="email-input" value="anna.becker@gmail.com"></div>
             <div class="field">
               <label>Password</label>
               <input type="text" value="Anna2026!">
@@ -418,7 +418,7 @@ const STEPS = [
           <div class="form-col">
             <div class="env-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z" stroke="currentColor" stroke-width="1.8"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="1.8"/></svg></div>
             <h3 class="scr-title">Check your inbox</h3>
-            <p class="scr-sub">We sent a verification link to <b style="color:#0A0A0A">anna.becker@gmail.com</b></p>
+            <p class="scr-sub">We sent a verification link to <b class="email-text" style="color:#0A0A0A">anna.becker@gmail.com</b></p>
             <p style="font-size:12.5px;color:#8B9891;margin:4px 0 22px">Don't see it? Check your spam folder.</p>
             <div style="display:flex;gap:12px;align-items:center">
               <button class="btn ghost" disabled>Resend in 0:42</button>
@@ -568,7 +568,7 @@ const STEPS = [
           <div class="mv-num">14 325,23 &euro;</div>
           <span class="badge-good" style="background:#123227">${CHECK} +2 180,18 &euro; unrealized</span>
           <div class="dash-grid">
-            <div class="dash-card"><div class="label">Contact</div><div class="dash-row"><span>Email</span><b>anna.becker@gmail.com</b></div></div>
+            <div class="dash-card"><div class="label">Contact</div><div class="dash-row"><span>Email</span><b class="email-text">anna.becker@gmail.com</b></div></div>
             <div class="dash-card"><div class="label">Security</div><div class="dash-row"><span>2FA</span><b style="color:#3FDB8E">Enabled</b></div></div>
             <div class="kyc-banner">
               <div><div class="t">Identity verified</div><div class="s">Full trading limits unlocked. Manage security anytime in Settings.</div></div>
@@ -585,12 +585,26 @@ const byId = Object.fromEntries(STEPS.map((s,i)=>[s.id,i]));
 const ROUTES = {'':'landing'};
 STEPS.forEach(s=>{ ROUTES[s.id] = s.id; });
 
+let currentEmail = 'anna.becker@gmail.com';
+
+function applyEmail(){
+  deviceScreen.querySelectorAll('.email-input').forEach(el=>{ el.value = currentEmail; });
+  deviceScreen.querySelectorAll('.email-text').forEach(el=>{ el.textContent = currentEmail; });
+}
+
 function renderDevice(s){
   document.title = s.title || 'Kvarn X';
   deviceScreen.style.background = s.bg;
   deviceScreen.innerHTML = s.body;
+  applyEmail();
   window.scrollTo(0,0);
 }
+
+deviceScreen.addEventListener('input', (e)=>{
+  if(e.target.classList.contains('email-input')){
+    currentEmail = e.target.value || currentEmail;
+  }
+});
 
 // real URLs: #/signup, #/verify-email, etc. Browser Back/Forward works natively.
 function go(target){
