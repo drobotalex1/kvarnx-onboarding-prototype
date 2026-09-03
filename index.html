@@ -165,6 +165,7 @@
   .field input:focus,.field select:focus{outline:none;border-color:var(--mint-ink);}
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 26px;border-radius:999px;font-family:'Inter';font-weight:700;font-size:14.5px;border:none;cursor:pointer;}
   .btn.block{width:100%;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
   .btn.primary{background:var(--mint);color:var(--mint-ink);}
   .btn.ghost{background:transparent;color:var(--mint-ink);border:1.5px solid #DADFDA;}
   .btn.dark{background:var(--mint-ink);color:#fff;}
@@ -455,6 +456,13 @@ const STEPS = [
                 <div data-req="num"><span class="dot">${CHECK}</span> Number or symbol</div>
               </div>
             </div>
+            <div class="field">
+              <label>Confirm password</label>
+              <div class="pw-wrap">
+                <input type="password" class="pw-input" id="signupPwConfirm" value="Anna2026!">
+                <button type="button" class="pw-toggle" aria-label="Show password">${EYE}</button>
+              </div>
+            </div>
             <label class="tos"><input type="checkbox" checked id="signupTos"> I agree to the <a>Terms of Service</a> and <a>Privacy Policy</a></label>
             <div class="form-error" hidden></div>
             <button class="btn primary block" data-action="signup-submit">Create account</button>
@@ -717,8 +725,9 @@ function validateSignup(){
   clearError();
   const email = deviceScreen.querySelector('#signupEmail');
   const pw = deviceScreen.querySelector('#signupPw');
+  const pwConfirm = deviceScreen.querySelector('#signupPwConfirm');
   const tos = deviceScreen.querySelector('#signupTos');
-  [email, pw].forEach(el=> el && el.classList.remove('input-error'));
+  [email, pw, pwConfirm].forEach(el=> el && el.classList.remove('input-error'));
   if(!email.value || !EMAIL_RE.test(email.value)){
     markInvalid(email); showError('Enter a valid email address.'); return false;
   }
@@ -728,6 +737,9 @@ function validateSignup(){
   const checks = passwordChecks(pw.value);
   if(!checks.len || !checks.case || !checks.num){
     markInvalid(pw); showError('Your password doesn’t meet all the requirements above yet.'); return false;
+  }
+  if(pwConfirm.value !== pw.value){
+    markInvalid(pwConfirm); showError('Passwords don’t match.'); return false;
   }
   if(!tos.checked){
     showError('Please agree to the Terms of Service and Privacy Policy to continue.'); return false;
@@ -762,6 +774,13 @@ function validateForgot(){
   return true;
 }
 
+function updateSignupButtonState(){
+  const tos = deviceScreen.querySelector('#signupTos');
+  const submit = deviceScreen.querySelector('[data-action="signup-submit"]');
+  if(!tos || !submit) return;
+  submit.disabled = !tos.checked;
+}
+
 function renderDevice(s){
   document.title = s.title || 'Kvarn X';
   deviceScreen.style.background = s.bg;
@@ -769,6 +788,7 @@ function renderDevice(s){
   applyEmail();
   applyVerifiedState();
   updatePasswordChecklist();
+  updateSignupButtonState();
   window.scrollTo(0,0);
 }
 
@@ -781,6 +801,9 @@ deviceScreen.addEventListener('input', (e)=>{
   }
   if(e.target.id === 'signupPw'){
     updatePasswordChecklist();
+  }
+  if(e.target.id === 'signupTos'){
+    updateSignupButtonState();
   }
 });
 
