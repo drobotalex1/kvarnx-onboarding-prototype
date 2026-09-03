@@ -169,14 +169,19 @@
   .trust-strip div{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#3C4642;}
   .trust-strip svg{width:13px;height:13px;color:var(--good);flex-shrink:0;}
 
-  .botcheck{display:flex;align-items:center;gap:12px;border:1.5px solid #E1E4DE;border-radius:10px;padding:12px 14px;max-width:400px;margin:4px 0 18px;background:#FAFBF9;cursor:pointer;user-select:none;}
-  .botcheck-box{width:22px;height:22px;border-radius:5px;border:1.5px solid #B9C0BA;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
-  .botcheck-box svg{width:14px;height:14px;opacity:0;}
-  .botcheck[data-verified="1"] .botcheck-box{background:var(--good);border-color:var(--good);}
-  .botcheck[data-verified="1"] .botcheck-box svg{opacity:1;}
-  .botcheck.checking .botcheck-box{border-color:var(--mint-ink);}
-  .botcheck-label{font-size:13px;font-weight:600;color:#1C2320;flex:1;}
-  .botcheck-brand{font-size:9.5px;color:#9AA39D;line-height:1.3;text-align:right;font-weight:600;}
+  .bot-modal{position:fixed;inset:0;background:rgba(10,10,10,.55);display:flex;align-items:center;justify-content:center;z-index:9999;}
+  .bot-modal[hidden]{display:none;}
+  .bot-modal-card{width:320px;background:#fff;border-radius:20px;padding:28px 24px 24px;box-shadow:0 30px 70px -20px rgba(0,0,0,.5);text-align:center;}
+  .bot-modal-card h4{font-family:'Manrope';font-weight:800;font-size:16px;margin:0 0 6px;color:#0A0A0A;}
+  .bot-modal-card p{font-size:12.5px;color:#5B6660;margin:0 0 22px;}
+  .bot-slider{position:relative;height:44px;border-radius:12px;background:#F0F2EE;overflow:hidden;}
+  .bot-slider-fill{position:absolute;inset:0;width:0;background:var(--mint-soft);border-radius:12px;transition:width 0s;}
+  .bot-slider-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#8B9891;pointer-events:none;}
+  .bot-slider-handle{position:absolute;top:2px;left:2px;width:40px;height:40px;border-radius:10px;background:var(--mint-ink);color:#fff;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;}
+  .bot-slider-handle svg{width:16px;height:16px;}
+  .bot-slider.done .bot-slider-fill{background:var(--mint-soft);}
+  .bot-slider.done .bot-slider-handle{background:var(--good);cursor:default;}
+  .bot-modal-status{margin-top:14px;font-size:12px;font-weight:700;color:var(--good);height:16px;}
 
   .code-row{display:flex;gap:8px;max-width:340px;margin:6px 0 14px;}
   .code-box{width:100%;aspect-ratio:1;text-align:center;font-size:20px;font-weight:700;font-family:'IBM Plex Mono';border-radius:10px;border:1.5px solid #E1E4DE;background:#FAFBF9;color:#0A0A0A;}
@@ -279,6 +284,18 @@
 </style>
 
 <div id="deviceScreen"></div>
+<div class="bot-modal" id="botModal" hidden>
+  <div class="bot-modal-card">
+    <h4>Verify you're human</h4>
+    <p>Slide to complete the check.</p>
+    <div class="bot-slider" id="botSlider">
+      <div class="bot-slider-fill" id="botSliderFill"></div>
+      <div class="bot-slider-label" id="botSliderLabel">Slide to verify</div>
+      <div class="bot-slider-handle" id="botSliderHandle"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="bot-modal-status" id="botModalStatus"></div>
+  </div>
+</div>
 
 
 <script>
@@ -448,7 +465,7 @@ const STEPS = [
       ['No country field at sign-up','residency isn&#8217;t asked here at all &mdash; Nordic bank-ID lives under its own "Bank ID &amp; other methods" toggle on the landing page, everyone else just verifies later with Sumsub.'],
       ['Email first, password later','matches Kraken/Coinbase: one field to get wrong here instead of three, and the password never exists until the email is confirmed.'],
       ['Trust signals inside the form itself','regulator + custody copy sits right next to the field being filled in, not only on the marketing page.'],
-      ['A visible bot check before the account is created','the live site has no anti-abuse step at all on this form.'],
+      ['A slider challenge on submit, not a permanent checkbox','matches Bybit&#8217;s own puzzle-slider &mdash; it only appears when you try to continue, instead of sitting on the form the whole time; the live site has no anti-abuse step here at all.'],
     ],
     refs:['Registration hidden behind Login — NOT FIXED','No password requirements — NOT FIXED','No Privacy/Terms consent — NOT FIXED','Geography limited to Scandinavia — PARTIAL'],
     body:`
@@ -469,11 +486,6 @@ const STEPS = [
               <div>${CHECK} EU-regulated custody</div>
             </div>
             <div class="field"><label>Email address</label><input type="text" class="email-input" id="signupEmail" value="anna.becker@gmail.com"></div>
-            <div class="botcheck" id="signupBotcheck" data-verified="0">
-              <div class="botcheck-box">${CHECK}</div>
-              <span class="botcheck-label">I&#8217;m not a robot</span>
-              <span class="botcheck-brand">reCAPTCHA-style<br>check</span>
-            </div>
             <label class="tos"><input type="checkbox" checked id="signupTos"> I agree to the <a>Terms of Service</a> and <a>Privacy Policy</a></label>
             <div class="form-error" hidden></div>
             <button class="btn primary block" data-action="signup-step1-submit">Continue</button>
@@ -801,16 +813,12 @@ function validateSignupStep1(){
   clearError();
   const email = deviceScreen.querySelector('#signupEmail');
   const tos = deviceScreen.querySelector('#signupTos');
-  const botcheck = deviceScreen.querySelector('#signupBotcheck');
   email.classList.remove('input-error');
   if(!email.value || !EMAIL_RE.test(email.value)){
     markInvalid(email); showError('Enter a valid email address.'); return false;
   }
   if(email.value.toLowerCase() === 'taken@kvarnx.com'){
     markInvalid(email); showError('An account with this email already exists. Try logging in instead.'); return false;
-  }
-  if(botcheck && botcheck.getAttribute('data-verified') !== '1'){
-    showError('Please confirm the “I’m not a robot” check before continuing.'); return false;
   }
   if(!tos.checked){
     showError('Please agree to the Terms of Service and Privacy Policy to continue.'); return false;
@@ -890,13 +898,11 @@ function schedulePasswordMatchCheck(){
 }
 
 function updateSignupButtonState(){
-  // step 1 (email + botcheck + tos)
+  // step 1 (email + tos) — the bot check itself is a modal triggered on submit, not gated here
   const step1Submit = deviceScreen.querySelector('[data-action="signup-step1-submit"]');
   if(step1Submit){
     const tos = deviceScreen.querySelector('#signupTos');
-    const botcheck = deviceScreen.querySelector('#signupBotcheck');
-    const botOk = !botcheck || botcheck.getAttribute('data-verified') === '1';
-    step1Submit.disabled = !(tos && tos.checked) || !botOk;
+    step1Submit.disabled = !(tos && tos.checked);
   }
   // step 3 (password)
   const submit = deviceScreen.querySelector('[data-action="signup-submit"]');
@@ -976,6 +982,72 @@ function routeFromHash(){
   render(id);
 }
 
+// bot-check modal: a slider challenge triggered on submit (Bybit-style), not a checkbox
+// left sitting on the form the whole time.
+const botModal = document.getElementById('botModal');
+const botSlider = document.getElementById('botSlider');
+const botSliderFill = document.getElementById('botSliderFill');
+const botSliderHandle = document.getElementById('botSliderHandle');
+const botSliderLabel = document.getElementById('botSliderLabel');
+const botModalStatus = document.getElementById('botModalStatus');
+let botOnComplete = null;
+let botDragging = false;
+
+function resetBotSlider(){
+  botSlider.classList.remove('done');
+  botSliderHandle.style.left = '2px';
+  botSliderFill.style.width = '0px';
+  botSliderLabel.textContent = 'Slide to verify';
+  botModalStatus.textContent = '';
+}
+
+function openBotModal(onComplete){
+  botOnComplete = onComplete;
+  resetBotSlider();
+  botModal.hidden = false;
+}
+
+function closeBotModal(){
+  botModal.hidden = true;
+}
+
+function botSliderMove(clientX){
+  const track = botSlider.getBoundingClientRect();
+  const max = track.width - 44;
+  let x = clientX - track.left - 20;
+  x = Math.max(2, Math.min(max, x));
+  botSliderHandle.style.left = x + 'px';
+  botSliderFill.style.width = (x + 40) + 'px';
+  if(x >= max - 2){
+    botSlider.classList.add('done');
+    botSliderLabel.textContent = '';
+    botModalStatus.textContent = 'Verified ✓';
+    botDragging = false;
+    setTimeout(()=>{
+      closeBotModal();
+      if(botOnComplete) botOnComplete();
+    }, 500);
+  }
+}
+
+botSliderHandle.addEventListener('pointerdown', (e)=>{
+  if(botSlider.classList.contains('done')) return;
+  botDragging = true;
+  botSliderHandle.setPointerCapture(e.pointerId);
+});
+botSliderHandle.addEventListener('pointermove', (e)=>{
+  if(!botDragging) return;
+  botSliderMove(e.clientX);
+});
+botSliderHandle.addEventListener('pointerup', ()=>{
+  if(!botDragging) return;
+  botDragging = false;
+  if(!botSlider.classList.contains('done')) resetBotSlider();
+});
+botModal.addEventListener('click', (e)=>{
+  if(e.target === botModal) closeBotModal(); // click outside the card dismisses without verifying
+});
+
 deviceScreen.addEventListener('click', (e)=>{
   const toggle = e.target.closest('.pw-toggle');
   if(toggle){
@@ -985,18 +1057,6 @@ deviceScreen.addEventListener('click', (e)=>{
     input.type = showing ? 'password' : 'text';
     toggle.innerHTML = showing ? EYE : EYE_OFF;
     toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
-    return;
-  }
-
-  const botcheck = e.target.closest('.botcheck');
-  if(botcheck){
-    if(botcheck.getAttribute('data-verified') === '1') return;
-    botcheck.classList.add('checking');
-    setTimeout(()=>{
-      botcheck.classList.remove('checking');
-      botcheck.setAttribute('data-verified', '1');
-      updateSignupButtonState();
-    }, 550);
     return;
   }
 
@@ -1017,7 +1077,7 @@ deviceScreen.addEventListener('click', (e)=>{
   if(actionEl){
     e.preventDefault();
     const action = actionEl.getAttribute('data-action');
-    if(action === 'signup-step1-submit'){ if(validateSignupStep1()) go('verify'); }
+    if(action === 'signup-step1-submit'){ if(validateSignupStep1()) openBotModal(()=>go('verify')); }
     else if(action === 'verify-code-submit'){
       if(validateCode()){
         regState = 'verified_no_password';
