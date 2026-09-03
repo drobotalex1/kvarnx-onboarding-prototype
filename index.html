@@ -742,7 +742,7 @@ function validateSignup(){
     markInvalid(pw); showError('Your password doesn’t meet all the requirements above yet.'); return false;
   }
   if(pwConfirm.value !== pw.value){
-    markInvalid(pwConfirm); showError('Passwords don’t match.'); return false;
+    markInvalid(pwConfirm); return false;
   }
   if(!tos.checked){
     showError('Please agree to the Terms of Service and Privacy Policy to continue.'); return false;
@@ -798,7 +798,12 @@ function updateSignupButtonState(){
   const tos = deviceScreen.querySelector('#signupTos');
   const submit = deviceScreen.querySelector('[data-action="signup-submit"]');
   if(!tos || !submit) return;
-  submit.disabled = !tos.checked;
+  const pw = deviceScreen.querySelector('#signupPw');
+  const pwConfirm = deviceScreen.querySelector('#signupPwConfirm');
+  const mismatch = pw && pwConfirm && pwConfirm.value !== pw.value;
+  const checks = pw ? passwordChecks(pw.value) : {len:true,case:true,num:true};
+  const weak = !checks.len || !checks.case || !checks.num;
+  submit.disabled = !tos.checked || mismatch || weak;
 }
 
 function renderDevice(s){
@@ -824,6 +829,7 @@ deviceScreen.addEventListener('input', (e)=>{
   }
   if(e.target.id === 'signupPw' || e.target.id === 'signupPwConfirm'){
     schedulePasswordMatchCheck();
+    updateSignupButtonState();
   }
   if(e.target.id === 'signupTos'){
     updateSignupButtonState();
