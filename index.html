@@ -464,7 +464,6 @@ const STEPS = [
       ['Required consent checkbox','Terms &amp; Privacy must be ticked before the button activates &mdash; currently missing entirely.'],
       ['No country field at sign-up','residency isn&#8217;t asked here at all &mdash; Nordic bank-ID lives under its own "Bank ID &amp; other methods" toggle on the landing page, everyone else just verifies later with Sumsub.'],
       ['Email first, password later','matches Kraken/Coinbase: one field to get wrong here instead of three, and the password never exists until the email is confirmed.'],
-      ['Trust signals inside the form itself','regulator + custody copy sits right next to the field being filled in, not only on the marketing page.'],
       ['A slider challenge on submit, not a permanent checkbox','matches Bybit&#8217;s own puzzle-slider &mdash; it only appears when you try to continue, instead of sitting on the form the whole time; the live site has no anti-abuse step here at all.'],
     ],
     refs:['Registration hidden behind Login — NOT FIXED','No password requirements — NOT FIXED','No Privacy/Terms consent — NOT FIXED','Geography limited to Scandinavia — PARTIAL'],
@@ -479,11 +478,6 @@ const STEPS = [
             <div class="tabgroup" style="max-width:100%">
               <button class="active">Personal account</button>
               <button>Business account</button>
-            </div>
-            <div class="trust-strip">
-              <div>${CHECK} Supervised by FIN&#8209;FSA</div>
-              <div>${CHECK} Client assets held separately</div>
-              <div>${CHECK} EU-regulated custody</div>
             </div>
             <div class="field"><label>Email address</label><input type="text" class="email-input" id="signupEmail" value="anna.becker@gmail.com"></div>
             <label class="tos"><input type="checkbox" checked id="signupTos"> I agree to the <a>Terms of Service</a> and <a>Privacy Policy</a></label>
